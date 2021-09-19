@@ -43,28 +43,28 @@ static nrfx_twi_t* twi_channel;
  */
 const uint8_t ssd1306_init_commands[] = {
     SSD1306_DISPLAYOFF, /* display off */
-    SSD1306_SETLOWCOLUMN, /* set lower column address */
-    SSD1306_SETHIGHCOLUMN, /* set higher column address */
-    SSD1306_SETSTARTLINE, /* set display start line */
+    SSD1306_SETLOWCOLUMN, /** Set Lower Column Start Address for Page Addressing Mode. */
+    SSD1306_SETHIGHCOLUMN, /** Set Higher Column Start Address for Page Addressing Mode. */
+    SSD1306_SETSTARTLINE, /** Set display RAM display start line register from 0 - 63. */
     SSD1306_PAGESTARTADDR, /* set page address */
-    SSD1306_SETCONTRAST, /* contract control */
-    0xFF, /* 128 */
+    SSD1306_SETCONTRAST, /** Set Display Contrast to one of 256 steps. */
+    0x80, /* 128 */
 #ifdef SSD1306_ROTATE_180
     SSD1306_SEGREMAP_RESET, /* set segment remap */
 #else
     SSD1306_SEGREMAP_INVERSE, /* set segment remap */
 #endif
-    SSD1306_NORMALDISPLAY, /* normal / reverse */
-    SSD1306_SETMULTIPLEX, /* multiplex ratio */
+    SSD1306_NORMALDISPLAY, /** Set Normal Display. */
+    SSD1306_SETMULTIPLEX, /** Set Multiplex Ratio from 16 to 63. */
 #if SSD1306_LCDHEIGHT == 64
-    0x3F, /* duty = 1/32 */
+    0x3F, /* LCDHEIGHT - 1 */
 #else
-    0x1F, /* duty = 1/32 */
+    0x1F, /* LCDHEIGHT - 1 */
 #endif
 #ifdef SSD1306_ROTATE_180
-    SSD1306_COMSCANINC, /* Com scan direction */
+    SSD1306_COMSCANINC, /** Set COM output scan direction normal. */
 #else
-    SSD1306_COMSCANDEC,
+    SSD1306_COMSCANDEC,/** Set COM output scan direction reversed. */
 #endif
     SSD1306_SETDISPLAYOFFSET, /* set display offset */
     0x00,
@@ -72,15 +72,17 @@ const uint8_t ssd1306_init_commands[] = {
     0x80,
     SSD1306_SETPRECHARGE, /* set pre-charge period */
     0xF1,
-    SSD1306_SETCOMPINS, /* set COM pins */
+    SSD1306_SETCOMPINS, /** Sets COM signals pin configuration to match the OLED panel layout. */
 #if SSD1306_LCDHEIGHT == 64
     0x12, /* duty = 1/32 */
 #else
     0x02, /* duty = 1/32 */
 #endif
-    SSD1306_SETVCOMDETECT, /* set vcomh */
+    SSD1306_SETVCOMDETECT, /** This command adjusts the VCOMH regulator output. */
     0x40,
-    SSD1306_CHARGEPUMP, /* set charge pump enable */
+    SSD1306_MEMORYMODE,
+    0x00,
+    SSD1306_CHARGEPUMP, /** Enable or disable charge pump.  Follow with 0X14 enable, 0X10 disable. */
     0x14,
     SSD1306_COLUMNADDR,
     0x00,
@@ -195,9 +197,6 @@ static void ssd1306_wake()
 bool ssd1306_buff_dirty[SSD1306_ROWS];
 
 static enum connection_type conn_type = 0;
-#ifdef ESB_COMM
-static enum esb_keyboard_role esb_status = 0;
-#endif
 static bool pwr_attach = false, usb_conn = false, ble_conn = false;
 static bool passkey_req = false;
 static uint8_t keyboard_led = 0;
@@ -323,6 +322,18 @@ static void ssd1306_event_handler(enum user_event event, void* arg)
     case USER_EVT_LED: // 键盘灯状态
         keyboard_led = param;
         status_mark_dirty();
+        break;
+    case USER_EVT_INTERNAL:
+        switch (param) {
+        case INTERNAL_EVT_BATTERY_INFO_REFRESH:
+            //oled_draw_icons(0, battery_info.percentage, pwr_attach, conn_type, passkey_req, keyboard_led); //更新电池状态
+            break;
+        default:
+            break;
+        }
+        break;
+	case USER_EVT_TICK:
+        ssd1306_show_dirty_block();
         break;
     default:
         break;
