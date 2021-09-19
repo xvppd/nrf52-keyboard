@@ -319,8 +319,6 @@ static void power_management_init(void)
     ret_code_t err_code;
     err_code = nrf_pwr_mgmt_init();
     APP_ERROR_CHECK(err_code);
-
-    sd_power_dcdc_mode_set(1);
 }
 
 /**@brief Function for handling the idle state (main loop).
@@ -350,6 +348,10 @@ int main(void)
     trig_event_param(USER_EVT_STAGE, KBD_STATE_PRE_INIT);
 
     ble_stack_init();
+    // 启用DCDC模式
+#ifdef DCDC_ENABLED
+    sd_power_dcdc_mode_set(1);
+#endif
 #if APP_TIMER_CONFIG_USE_SCHEDULER == 1
     scheduler_init();
 #endif
@@ -358,8 +360,9 @@ int main(void)
 #if !defined(BOOTMAGIC_ENABLE) && defined(BOOTCHECK_ENABLE)
     // use internal function to check if should boot.
     boot_check();
-if (!sleep_flag) {
+if (!sleep_flag)
 #endif
+ {
     ble_services_init();
     battery_service_init();
     hid_service_init(service_error_handler);
@@ -367,7 +370,6 @@ if (!sleep_flag) {
     // call custom init function
     trig_event_param(USER_EVT_STAGE, KBD_STATE_POST_INIT);
 
-    // Start execution.
     timers_start();
 #ifdef MULTI_DEVICE_SWITCH
     switch_device_init();
@@ -375,9 +377,7 @@ if (!sleep_flag) {
     advertising_start(erase_bonds);
 
     trig_event_param(USER_EVT_STAGE, KBD_STATE_INITED);
-#if !defined(BOOTMAGIC_ENABLE) && defined(BOOTCHECK_ENABLE)
 }
-#endif
     // Enter main loop.
     for (;;) {
         idle_state_handle();
