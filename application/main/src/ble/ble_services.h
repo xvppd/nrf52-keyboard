@@ -52,6 +52,10 @@ void advertising_restart(ble_adv_mode_t mode, bool reset);
  */
 void ble_stack_init(void);
 
+/**@brief Function for disabling the BLE stack.
+ */
+void ble_stack_stop(void);
+
 /**@brief Send passkey.
  */
 void ble_passkey_send(uint8_t const * p_key);

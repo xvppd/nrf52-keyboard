@@ -606,7 +606,9 @@ static void dfu_init(void)
  */
 static void conn_params_error_handler(uint32_t nrf_error)
 {
-    APP_ERROR_HANDLER(nrf_error);
+    if (nrf_error != NRF_ERROR_INVALID_STATE) {
+        APP_ERROR_CHECK(nrf_error);
+    }
 }
 
 /**
@@ -846,6 +848,17 @@ void ble_stack_init(void)
 
     // Register a handler for BLE events.
     NRF_SDH_BLE_OBSERVER(m_ble_observer, APP_BLE_OBSERVER_PRIO, ble_evt_handler, NULL);
+}
+
+
+void ble_stack_stop(void)
+{
+    uint32_t err_code;
+
+    err_code = nrf_sdh_disable_request();
+    APP_ERROR_CHECK(err_code);
+
+    ASSERT(!nrf_sdh_is_enabled());
 }
 
 /**
