@@ -286,7 +286,7 @@ flash: default
 
 pyocd_flash: default
 	@echo Flashing: $(OUTPUT_DIRECTORY)/$(NRF_CHIP)_bootloader.hex
-	pyocd flash -t nrf52 -e sector -f 2M $(OUTPUT_DIRECTORY)$(NRF_CHIP)_bootloader.hex
+	pyocd flash -t nrf52 -e sector -f 2M $(OUTPUT_DIRECTORY)/$(NRF_CHIP)_bootloader.hex
 	pyocd cmd -t nrf52 -c reset
 
 # Flash softdevice
