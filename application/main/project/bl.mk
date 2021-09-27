@@ -23,3 +23,6 @@ flash_bootloader:
 
 pyocd_flash_bootloader:
 	@make $(BL_MAKE_ARGS) pyocd_flash
+
+openocd_flash_bootloader:
+	@make $(BL_MAKE_ARGS) openocd_flash

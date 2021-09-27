@@ -325,8 +325,8 @@ help:
 	@echo		flash_softdevice    - Flashing softdevice
 	@echo		flash_all           - Flashing bootloader softdevice and application with dfu setting
 	@echo		whole               - make all keyboards firmware in the keyboard folder
-	@echo All targets starts with "flash" could has prefix "pyocd_", which \
-	means use pyocd to flash chip. 
+	@echo All targets starts with "flash" could has prefix "pyocd_" or "openocd", which \
+	means use pyocd  or openocd to flash chip. 
 
 
 include $(TEMPLATE_PATH)/Makefile.common
@@ -404,12 +404,31 @@ pyocd_flash_all: all
 	pyocd flash -t nrf52 -e sector -f 2M $(OUTPUT_DIRECTORY)/nrf52_all.hex
 	pyocd cmd -t nrf52 -c reset
 
+openocd_flash: default
+	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52_kbd.hex
+	$(OCD) -f $(OCD_CFG) -c "program $(OUTPUT_DIRECTORY)/nrf52_kbd.hex verify reset exit"
+
+openocd_flash_setting: setting
+	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52_kbd.hex and $(OUTPUT_DIRECTORY)/nrf52_settings.hex
+	$(OCD) -f $(OCD_CFG) -c "program $(OUTPUT_DIRECTORY)/nrf52_settings.hex verify reset exit" -c "program $(OUTPUT_DIRECTORY)/nrf52_kbd.hex verify reset exit"
+
+openocd_flash_softdevice:
+	@echo Flashing: $(SOFTDEVICE_PATH)
+	$(OCD) -f $(OCD_CFG) -c "program $(SOFTDEVICE_PATH) verify reset exit"
+
+openocd_flash_all: all
+	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52_all.hex
+	$(OCD) -f $(OCD_CFG) -c "program $(OUTPUT_DIRECTORY)/nrf52_all.hex verify reset exit"
+
 # Erase chip
 erase:
 	nrfjprog -f nrf52 --eraseall
 
 pyocd_erase:
 	pyocd erase -t nrf52 -c
+
+openocd_erase:
+	$(OCD) -f $(OCD_CFG) -c "init; halt; nrf5 mass_erase; exit"
 
 SDK_CONFIG_FILE := ../config/sdk_config.h
 CMSIS_CONFIG_TOOL := $(SDK_ROOT)/external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar

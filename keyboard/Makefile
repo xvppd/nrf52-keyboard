@@ -41,5 +41,5 @@ help:
 	@echo		flash_softdevice    - Flashing softdevice
 	@echo		flash_all           - Flashing bootloader softdevice and application with dfu setting
 	@echo		whole               - make all keyboards firmware in the keyboard folder
-	@echo All targets starts with "flash" could has prefix "pyocd_", which \
-	means use pyocd to flash chip. 
+	@echo All targets starts with "flash" could has prefix "pyocd_" or "openocd", which \
+	means use pyocd  or openocd to flash chip. 

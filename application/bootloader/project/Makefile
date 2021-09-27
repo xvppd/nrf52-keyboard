@@ -289,6 +289,10 @@ pyocd_flash: default
 	pyocd flash -t nrf52 -e sector -f 2M $(OUTPUT_DIRECTORY)/$(NRF_CHIP)_bootloader.hex
 	pyocd cmd -t nrf52 -c reset
 
+openocd_flash: default
+	@echo Flashing: $(OUTPUT_DIRECTORY)/$(NRF_CHIP)_bootloader.hex
+	$(OCD) -f $(OCD_CFG) -c "program $(OUTPUT_DIRECTORY)/$(NRF_CHIP)_bootloader.hex verify reset exit"
+
 # Flash softdevice
 flash_softdevice:
 	@echo Flashing: $(SOFTDEVICE_NAME)
@@ -300,6 +304,10 @@ pyocd_flash_softdevice:
 	pyocd flash -t nrf52 -e sector -f 2M $(SOFTDEVICE_PATH)
 	pyocd cmd -t nrf52 -c reset
 
+openocd_flash_softdevice:
+	@echo Flashing: $(SOFTDEVICE_NAME)
+	$(OCD) -f $(OCD_CFG) -c "program $(SOFTDEVICE_PATH) verify reset exit"
+
 merge_softdevice: default
 	@echo Merging program and SoftDevice $(SOFTDEVICE_NAME) to $(OUTPUT_DIRECTORY)/$(NRF_CHIP)_bootloader_sd.hex
 	mergehex -m $(SOFTDEVICE_PATH) $(OUTPUT_DIRECTORY)/$(NRF_CHIP)_bootloader.hex -o $(OUTPUT_DIRECTORY)/$(NRF_CHIP)_bootloader_sd.hex
@@ -309,6 +317,9 @@ erase:
 
 pyocd_erase:
 	pyocd erase -t nrf52 -c
+
+openocd_erase:
+	$(OCD) -f $(OCD_CFG) -c "init; halt; nrf5 mass_erase; exit"
 
 SDK_CONFIG_FILE := ../sdk_config.h
 CMSIS_CONFIG_TOOL := $(SDK_ROOT)/external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar

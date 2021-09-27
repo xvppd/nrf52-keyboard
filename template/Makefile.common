@@ -126,6 +126,8 @@ NM      := $(call quote,$(GNU_INSTALL_ROOT)$(GNU_PREFIX)-nm)
 OBJDUMP := $(call quote,$(GNU_INSTALL_ROOT)$(GNU_PREFIX)-objdump)
 OBJCOPY := $(call quote,$(GNU_INSTALL_ROOT)$(GNU_PREFIX)-objcopy)
 SIZE    := $(call quote,$(GNU_INSTALL_ROOT)$(GNU_PREFIX)-size)
+OCD     := $(call quote,$(OPENOCD))
+OCD_CFG := $(call quote,$(OPENOCD_CFG))
 $(if $(shell $(CC) --version),,$(info Cannot find: $(CC).) \
   $(info Please set values in: "$(abspath $(TOOLCHAIN_CONFIG_FILE))") \
   $(info according to the actual configuration of your system.) \
