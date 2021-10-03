@@ -410,7 +410,7 @@ openocd_flash: default
 
 openocd_flash_setting: setting
 	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52_kbd.hex and $(OUTPUT_DIRECTORY)/nrf52_settings.hex
-	$(OCD) -f $(OCD_CFG) -c "program $(OUTPUT_DIRECTORY)/nrf52_settings.hex verify reset exit" -c "program $(OUTPUT_DIRECTORY)/nrf52_kbd.hex verify reset exit"
+	$(OCD) -f $(OCD_CFG) -c "program $(OUTPUT_DIRECTORY)/nrf52_settings.hex verify" -c "program $(OUTPUT_DIRECTORY)/nrf52_kbd.hex verify reset exit"
 
 openocd_flash_softdevice:
 	@echo Flashing: $(SOFTDEVICE_PATH)
