@@ -425,6 +425,9 @@ void USBDeviceInit()
 {
     IE_USB = 0;
     USB_CTRL = 0x00; // 先设定USB设备模式
+    UDEV_CTRL = bUD_PD_DIS; // 禁止DP/DM下拉电阻
+    UDEV_CTRL &= ~bUD_LOW_SPEED; //选择全速12M模式
+    USB_CTRL &= ~bUC_LOW_SPEED; //选择全速12M模式
 
     UEP0_DMA = (uint16_t)Ep0Buffer; //端点0数据传输地址
     UEP4_1_MOD |= bUEP4_RX_EN | bUEP4_TX_EN; //端点0单64字节收发缓冲区, 端点4单64字节收发缓冲区
@@ -445,7 +448,6 @@ void USBDeviceInit()
     UEP4_CTRL = bUEP_AUTO_TOG | UEP_T_RES_NAK; //端点4自动翻转同步标志位，IN事务返回NAK
 
     USB_DEV_AD = 0x00;
-    UDEV_CTRL = bUD_PD_DIS; // 禁止DP/DM下拉电阻
     USB_CTRL = bUC_DEV_PU_EN | bUC_INT_BUSY | bUC_DMA_EN; // 启动USB设备及DMA，在中断期间中断标志未清除前自动返回NAK
     UDEV_CTRL |= bUD_PORT_EN; // 允许USB端口
     USB_INT_FG = 0xFF; // 清中断标志
