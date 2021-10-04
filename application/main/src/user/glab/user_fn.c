@@ -21,12 +21,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifdef RGB_LIGHT_ENABLE
 #include "rgb_light.h"
 #endif
-#ifdef RGBLIGHT_ENABLE
-#include "rgblight.h"
-#endif
-#ifdef RGB_MATRIX_ENABLE
-#include "rgb_matrix.h"
-#endif
 
 #define MODS_SHIFT_MASK (MOD_BIT(KC_LSHIFT) | MOD_BIT(KC_RSHIFT))
 #define MODS_RSHIFT_MASK (MOD_BIT(KC_RSHIFT))
@@ -144,40 +138,6 @@ void custom_fn_handler(keyrecord_t* record, uint8_t id, uint8_t opt)
                 break;
             case RGB_LIGHT_TML:
                 rgb_indicator_toggle();
-                break;
-#endif
-            default:
-                break;
-            }
-        }
-        break;
-    case RGBLIGHT_CONTROL:
-            if (record->event.pressed) {
-            switch (opt) {
-#if defined(RGB_MATRIX_ENABLE) || defined(RGBLIGHT_ENABLE) //WS2812 RGB Light（矩阵）控制
-            case RGBLIGHT_STEP:
-                rgblight_step();
-                break;
-            case RGBLIGHT_TOGGLE:
-                rgblight_toggle();
-                break;
-            case RGBLIGHT_IHUE:
-                rgblight_increase_hue();
-                break;
-            case RGBLIGHT_DHUE:
-                rgblight_decrease_hue();
-                break;
-            case RGBLIGHT_ISAT:
-                rgblight_increase_sat();
-                break;
-            case RGBLIGHT_DSAT:
-                rgblight_decrease_sat();
-                break;
-            case RGBLIGHT_IVAL:
-                rgblight_increase_val();
-                break;
-            case RGBLIGHT_DVAL:
-                rgblight_decrease_val();
                 break;
 #endif
             default:
