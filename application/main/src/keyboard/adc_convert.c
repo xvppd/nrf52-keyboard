@@ -20,6 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "app_timer.h"
 #include "nrf_saadc.h"
 #include "nrfx_saadc.h"
+#include "keyboard_battery.h"
 
 NRF_SECTION_DEF(adc_channel, struct adc_channel_config*);
 
@@ -34,6 +35,7 @@ static nrf_saadc_value_t m_buffer_pool[2][TOTAL_SAMPLES_BUFFER];
 APP_TIMER_DEF(adc_timer);
 
 static bool saadc_inited = false;
+static uint8_t callback_times;
 
 /**
  * @brief ADC 的事件回调
@@ -65,8 +67,11 @@ static void adc_event_callback(nrfx_saadc_evt_t const* p_event)
             if (channel->adc_finish != 0) {
                 if (channel->period_pass <= ADC_TIMER_PERIOD) {
                     channel->adc_finish(results[i]);
-                    // reload 周期
-                    channel->period_pass = channel->period;
+                    // 尽快显示,短路评估,因此callback_times不会溢出
+                    if (!channel->period_pass && callback_times++ >= ADC_BUFFER_SIZE) {
+                        // reload 周期
+                        channel->period_pass = channel->period;
+                    }
                 }
             }
         }

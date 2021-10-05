@@ -24,7 +24,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "adc_convert.h"
 #include "keyboard_evt.h"
 
-#define ADC_BUFFER_SIZE 6
 struct BatteryInfo battery_info;
 
 uint16_t adc_buffer[ADC_BUFFER_SIZE];
@@ -78,6 +77,7 @@ static struct adc_channel_config batt_channel = {
     .adc_start = 0,
     .adc_finish = &adc_result_handler,
     .period = 2000,
+    .period_pass = 0,
     .config = &channel_config,
 };
 

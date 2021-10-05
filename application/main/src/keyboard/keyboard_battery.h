@@ -1,6 +1,8 @@
 #pragma once
 #include <stdint.h>
 
+#define ADC_BUFFER_SIZE 6
+
 struct BatteryInfo {
     uint16_t voltage; // 电压 (mv)
     uint8_t percentage; // 百分比
