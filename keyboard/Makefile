@@ -1,6 +1,6 @@
 OUTPUT_DIR = _build
 SUBDIRS=$(filter-out $(OUTPUT_DIR),$(shell ls -l | grep ^d | grep -v 'ergoconn\|g84-4100\|lkb-core\|lot60-ble\|template\|test' | awk '{print $$9}'))
-export VERSION=$(shell git log --abbrev-commit --pretty=oneline -1 | cut -c 1-7 || echo 'unknown')
+export VERSION=0f$(shell git log --abbrev-commit --pretty=oneline -1 | cut -c 1-6 || echo 'unknown')
 export BUILDTIME=$(shell date +"%Y%m%d")
 export FILE_VERSION = $(BUILDTIME)-$(VERSION)
 export RELEASE_DIR = ../$(OUTPUT_DIR)
