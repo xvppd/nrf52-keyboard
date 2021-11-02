@@ -323,15 +323,6 @@ static void ssd1306_event_handler(enum user_event event, void* arg)
         keyboard_led = param;
         status_mark_dirty();
         break;
-    case USER_EVT_INTERNAL:
-        switch (param) {
-        case INTERNAL_EVT_BATTERY_INFO_REFRESH:
-            //oled_draw_icons(0, battery_info.percentage, pwr_attach, conn_type, passkey_req, keyboard_led); //更新电池状态
-            break;
-        default:
-            break;
-        }
-        break;
 	case USER_EVT_TICK:
         ssd1306_show_dirty_block();
         break;
