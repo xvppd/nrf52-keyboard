@@ -42,7 +42,7 @@ INC_FOLDERS += $(APP_SRC_DIR)/keyboard \
     $(APP_SRC_DIR)/ble
 
 # Version string
-VERSION := 0f$(shell git log --abbrev-commit --pretty=oneline -1 | cut -c 1-6 || echo '000000')
+VERSION := af$(shell git log --abbrev-commit --pretty=oneline -1 | cut -c 1-6 || echo '000000')
 OPT_DEFS += -DVERSION=$(VERSION)
 OPT_DEFS += -DBUILD_TIME=$(shell date +%s)
 
