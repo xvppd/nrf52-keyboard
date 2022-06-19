@@ -94,7 +94,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define RGB_MATRIX_STARTUP_VAL RGB_MATRIX_MAXIMUM_BRIGHTNESS // Sets the default brightness value, if none has been set
 #define RGB_MATRIX_CENTER { 120, 32 }
 #define RGB_MATRIX_INDICATORS_NUM 10  //NUM灯的序号，从0起算
-#define RGB_MATRIX_INDICATORS_SCLK 11  //SCLK灯的序号，从0起算
+#define RGB_MATRIX_INDICATORS_SCROLL 11  //SCLK灯的序号，从0起算
 #define RGB_MATRIX_INDICATORS_CAPS 12  //CAPS灯的序号，从0起算
 #define RGB_MATRIX_INDICATORS_HOST 1   //输出状态灯的序号，从0起算
 
