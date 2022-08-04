@@ -84,23 +84,21 @@ static struct adc_channel_config batt_channel = {
 ADC_CONVERT_CHANNEL(batt_channel);
 
 /**
- * @brief 输出电池剩余电量.
+ * @brief 输出电池实时电压.
  *
  */
 void print_battery_percentage()
 {
     int digits[10] = { KC_0, KC_1, KC_2, KC_3, KC_4, KC_5, KC_6, KC_7, KC_8, KC_9 };
-    char percentage = battery_info.percentage;
+    uint16_t voltage = battery_info.voltage;
 
     if (percentage == 0) {
         type_code(KC_N);
-    } else if (percentage == 100) {
-        type_code(KC_F);
     } else {
-        int factor = 100;
+        int factor = 1000;
         do {
-            if (percentage >= factor) {
-                int index = (percentage / factor) % 10;
+            if (voltage >= factor) {
+                int index = (voltage / factor) % 10;
                 int keycode = digits[index];
                 type_code(keycode);
             }
