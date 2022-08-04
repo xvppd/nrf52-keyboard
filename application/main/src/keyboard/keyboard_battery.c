@@ -92,7 +92,7 @@ void print_battery_percentage()
     int digits[10] = { KC_0, KC_1, KC_2, KC_3, KC_4, KC_5, KC_6, KC_7, KC_8, KC_9 };
     uint16_t voltage = battery_info.voltage;
 
-    if (percentage == 0) {
+    if (voltage == 0) {
         type_code(KC_N);
     } else {
         int factor = 1000;
