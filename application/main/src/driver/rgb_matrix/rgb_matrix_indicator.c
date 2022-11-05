@@ -25,6 +25,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "rgb_matrix.h"
 #include "rgb_matrix_types.h"
 #include "usb_comm.h"
+#include "action_layer.h"
 
 extern uint8_t ble_channel; //引入蓝牙通道全局变量
 extern uint8_t power_save_mode; //引入省电模式全局变量
@@ -53,42 +54,42 @@ void rgb_matrix_indicators_advanced_kb(uint8_t led_min, uint8_t led_max)
 #endif
     //层状态指示灯
 #ifdef RGB_MATRIX_INDICATORS_LAYER_1
-    if ((power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯1
+    if (((layer_state & (1UL<<0)) > 0UL) && (power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯1
         rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_1, RGB_SPRINGGREEN);
     }
 #endif
 #ifdef RGB_MATRIX_INDICATORS_LAYER_2
-    if ((power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯2
+    if (((layer_state & (1UL<<1)) > 0UL) && (power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯2
         rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_2, RGB_SPRINGGREEN);
     }
 #endif
 #ifdef RGB_MATRIX_INDICATORS_LAYER_3
-    if ((power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯3
+    if (((layer_state & (1UL<<2)) > 0UL) && (power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯3
         rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_3, RGB_SPRINGGREEN);
     }
 #endif
 #ifdef RGB_MATRIX_INDICATORS_LAYER_4
-    if ((power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯4
+    if (((layer_state & (1UL<<3)) > 0UL) && (power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯4
         rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_4, RGB_SPRINGGREEN);
     }
 #endif
 #ifdef RGB_MATRIX_INDICATORS_LAYER_5
-    if ((power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯5
+    if (((layer_state & (1UL<<4)) > 0UL) && (power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯5
         rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_5, RGB_SPRINGGREEN);
     }
 #endif
 #ifdef RGB_MATRIX_INDICATORS_LAYER_6
-    if ((power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯6
+    if (((layer_state & (1UL<<5)) > 0UL) && (power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯6
         rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_6, RGB_SPRINGGREEN);
     }
 #endif
 #ifdef RGB_MATRIX_INDICATORS_LAYER_7
-    if ((power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯7
+    if (((layer_state & (1UL<<6)) > 0UL) && (power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯7
         rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_7, RGB_SPRINGGREEN);
     }
 #endif
 #ifdef RGB_MATRIX_INDICATORS_LAYER_8
-    if ((power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯8
+    if (((layer_state & (1UL<<7)) > 0UL) && (power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯8
         rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_8, RGB_SPRINGGREEN);
     }
 #endif
