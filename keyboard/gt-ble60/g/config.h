@@ -95,7 +95,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define RGB_MATRIX_CENTER { 120, 32 }
 #define RGB_MATRIX_INDICATORS_NUM 10  //NUM灯的序号，从0起算
 #define RGB_MATRIX_INDICATORS_SCROLL 11  //SCLK灯的序号，从0起算
-#define RGB_MATRIX_INDICATORS_CAPS 12  //CAPS灯的序号，从0起算
+#define RGB_MATRIX_INDICATORS_CAPS 28  //CAPS灯的序号，从0起算
 
 #define RGB_MATRIX_INDICATORS_LAYER_1 1  //1层指示灯
 #define RGB_MATRIX_INDICATORS_LAYER_2 2  //2层指示灯
@@ -106,7 +106,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define RGB_MATRIX_INDICATORS_LAYER_7 7  //7层指示灯
 #define RGB_MATRIX_INDICATORS_LAYER_8 8  //8层指示灯
 
-#define RGB_MATRIX_INDICATORS_HOST 0   //输出状态灯的序号，从0起算
+#define RGB_MATRIX_INDICATORS_HOST 12   //输出状态灯的序号，从0起算
 
 // 3灯指示配置引脚
 // #define LED_STATUS_BLE 19
