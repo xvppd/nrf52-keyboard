@@ -54,7 +54,7 @@ void rgb_matrix_indicators_advanced_kb(uint8_t led_min, uint8_t led_max)
 #endif
     //层状态指示灯
 #ifdef RGB_MATRIX_INDICATORS_LAYER_1
-    if ((((layer_state & (1UL<<0)) > 0UL) || ((default_layer_state & (1UL<<0)) > 0UL)) && (power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯1
+    if ((((layer_state & (1UL<<0)) > 0UL) || ((default_layer_state & (1UL<<0)) > 0UL) || (default_layer_state == 0)) && (power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯1
         rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_1, RGB_TURQUOISE);
     }
 #endif
