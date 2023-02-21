@@ -84,20 +84,29 @@ static void UsbTransfurEventHandler()
  */
 static void UsbBusResetEventHandler()
 {
-    UEP0_CTRL = UEP_R_RES_ACK | UEP_T_RES_NAK;
-    UEP1_CTRL = bUEP_AUTO_TOG | UEP_R_RES_ACK | UEP_T_RES_NAK;
-    UEP2_CTRL = bUEP_AUTO_TOG | UEP_R_RES_ACK | UEP_T_RES_NAK;
-    UEP3_CTRL = bUEP_AUTO_TOG | UEP_R_RES_ACK | UEP_T_RES_NAK;
-    UEP4_CTRL = bUEP_AUTO_TOG | UEP_R_RES_ACK | UEP_T_RES_NAK;
-    USB_DEV_AD = 0x00;
-    UIF_SUSPEND = 0;
-    UIF_TRANSFER = 0;
-    UIF_BUS_RST = 0; //清中断标志
+    //部分特殊的电脑休眠唤醒后，无法正确的接入电脑
+    //此处添加对休眠唤醒过程的判断，如遇到休眠唤醒时复位总线的，进行一次软复位
+    if (usb_state.remote_wake) {
+	    //软复位
+        SAFE_MOD = 0x55;
+        SAFE_MOD = 0xAA;
+        GLOBAL_CFG |= bSW_RESET;
+    } else {
+	    //总线复位
+        UEP0_CTRL = UEP_R_RES_ACK | UEP_T_RES_NAK;
+        UEP1_CTRL = bUEP_AUTO_TOG | UEP_R_RES_ACK | UEP_T_RES_NAK;
+        UEP2_CTRL = bUEP_AUTO_TOG | UEP_R_RES_ACK | UEP_T_RES_NAK;
+        UEP3_CTRL = bUEP_AUTO_TOG | UEP_R_RES_ACK | UEP_T_RES_NAK;
+        UEP4_CTRL = bUEP_AUTO_TOG | UEP_R_RES_ACK | UEP_T_RES_NAK;
+        USB_DEV_AD = 0x00;
+        UIF_SUSPEND = 0;
+        UIF_TRANSFER = 0;
+        UIF_BUS_RST = 0; //清中断标志
 
-    // 重置状态
-    usb_state.is_ready = false;
-    usb_state.protocol = true;
-    usb_state.setup_state = SETUP_IDLE;
+        // 重置状态
+        usb_state.is_ready = false;
+        usb_state.protocol = true;
+        usb_state.setup_state = SETUP_IDLE;
 }
 
 /** \brief USB 总线挂起或唤醒事件处理
