@@ -19,13 +19,20 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "../main.h"
 #include "usb_comm.h"
 
+#include "ble_services.h"
 #include "bootloader.h"
 #include "bootmagic.h"
 #include "eeconfig.h"
 #include "host.h"
-#include "keymap.h"
-#include "ble_services.h"
 #include "keyboard_battery.h"
+#include "keymap.h"
+
+#ifdef RGBLIGHT_ENABLE
+#include "rgblight.h"
+#endif
+#ifdef RGB_MATRIX_ENABLE
+#include "rgb_matrix.h"
+#endif
 
 #ifdef NKRO_ENABLE
 
@@ -46,15 +53,18 @@ static void toggle_nkro()
 }
 #endif
 
-static void share_action(uint8_t id, uint8_t opt)
+FN_HANDLER_DEF();
+
+__attribute__((weak)) void action_function(keyrecord_t* record, uint8_t id, uint8_t opt)
 {
-    switch (id) {
-    case KEYBOARD_CONTROL:
-        switch (opt) {
-        case CONTROL_SLEEP: // 睡眠
-            sleep(SLEEP_MANUALLY);
-            break;
-        case CONTROL_NKRO: // 切换NKRO
+    if (record->event.pressed) {
+        switch (id) {
+        case KEYBOARD_CONTROL:
+            switch (opt) {
+            case CONTROL_SLEEP: // 睡眠
+                sleep(SLEEP_MANUALLY);
+                break;
+            case CONTROL_NKRO: // 切换NKRO
 #ifdef NKRO_ENABLE
                 toggle_nkro();
 #endif
@@ -73,7 +83,7 @@ static void share_action(uint8_t id, uint8_t opt)
         case SWITCH_DEVICE:
             switch (opt) {
 #ifdef HAS_USB
-            case SWITCH_DEVICE_USB: // 切换设备
+            case SWITCH_DEVICE_USB: // 切换USB/无线设备
                 usb_comm_switch();
                 break;
 #endif
@@ -108,28 +118,9 @@ static void share_action(uint8_t id, uint8_t opt)
         }
     }
 
-FN_HANDLER_DEF();
-
-__attribute__((weak)) void action_function(keyrecord_t* record, uint8_t id, uint8_t opt)
-{
-    if (record->event.pressed) {
-        share_action(id, opt);
-    }
     // 交给其他Fn处理
     for (uint8_t i = 0; i < FN_HANDLER_COUNT; i++) {
         fn_handler* handler = (fn_handler*)FN_HANDLER_GET(i);
         (*handler)(record, id, opt);
-    }
-}
-
-CTRL_HANDLER_DEF();
-
-void control_action(uint8_t id, uint8_t opt)
-{
-    share_action(id, opt);
-    // 交给其他control处理
-    for (uint8_t i = 0; i < CTRL_HANDLER_COUNT; i++) {
-        control_handler* ctrl_handler = (control_handler*)CTRL_HANDLER_GET(i);
-        (*ctrl_handler)(id, opt);
     }
 }

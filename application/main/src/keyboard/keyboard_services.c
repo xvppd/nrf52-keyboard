@@ -98,6 +98,7 @@ static void keyboard_sleep_handler(void* p_context)
         keyboard_switch_scan_mode(true);
     } else if (sleep_counter == get_sleep_timeout()) {
         sleep(SLEEP_TIMEOUT);
+        return;
     }
 
     // trig TICK
@@ -193,6 +194,19 @@ void keyboard_timer_start(void)
     APP_ERROR_CHECK(err_code);
 
     err_code = app_timer_start(m_keyboard_sleep_timer, TICK_INTERVAL, NULL);
+    APP_ERROR_CHECK(err_code);
+}
+
+/**
+ * @brief 停止键盘计时器
+ * 
+ */
+void keyboard_timer_stop(void)
+{
+    ret_code_t err_code = app_timer_stop(m_keyboard_scan_timer);
+    APP_ERROR_CHECK(err_code);
+
+    err_code = app_timer_stop(m_keyboard_sleep_timer);
     APP_ERROR_CHECK(err_code);
 }
 

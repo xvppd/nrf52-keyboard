@@ -60,6 +60,7 @@ struct usb_status {
     enum uart_usb_state state; // 当前 UART 所属状态
 };
 
+static struct host_driver usb_driver;
 static struct usb_status status;
 
 MIXED_QUEUE(uint8_t, uart_queue, QUEUE_SIZE);
@@ -91,7 +92,7 @@ static void send_event(enum user_event event, uint8_t arg)
     switch (event) {
     case USER_EVT_USB:
         if (arg < USB_REMOTE_WAKE)
-            trig_event_param(USER_EVT_PROTOCOL, m_ble_in_report_mode); //USB 断开，切换到蓝牙HID 记录的协议模式 ? 需确认如果是返回2.4G模式是否会有影响
+            trig_event_param(USER_EVT_PROTOCOL, m_ble_in_report_mode); //USB 断开，根据无线模式，切换到 Report协议 或 蓝牙HID 记录的协议模式
         else
             trig_event_param(USER_EVT_PROTOCOL, status.usb_protocol);
         break;
@@ -121,7 +122,7 @@ static void set_state(bool host, bool wakeup, bool protocol)
     }
     if ((status.state == UART_STATE_INITED) || status.usb_protocol != protocol) {
         status.usb_protocol = protocol;
-        send_event(USER_EVT_PROTOCOL, usb_working() ? protocol : m_ble_in_report_mode); //如USB工作，切换到改变的协议，如果USB 断开切换到蓝牙HID 记录的协议模式？2.4G 模式是否会有影响？
+        send_event(USER_EVT_PROTOCOL, usb_working() ? protocol : m_ble_in_report_mode); //如USB工作，切换到改变的协议，如果USB 断开切换到无线模式对应的协议
     }
     if (status.state == UART_STATE_INITED) {
         status.state = UART_STATE_WORKING;
@@ -189,10 +190,8 @@ static void uart_on_recv()
                 uint8_t sum = checksum(recv_buf, recv_len - 1);
                 if (sum == recv_buf[recv_len - 1]) {
                     // U_CMD H_CMD H_LEN H_DAT... U_SUM
-                    respond_flag = false;
-                    hid_on_recv(recv_buf[1], recv_len - 4, &recv_buf[3]);
+                    hid_on_recv(&usb_driver, recv_buf[1], recv_len - 4, &recv_buf[3]);
                 } else {
-                    respond_flag = false;
                     hid_response_generic(HID_RESP_UART_CHECKSUM_ERROR);
                 }
                 recv_len = 0;
@@ -308,6 +307,12 @@ bool usb_working(void)
  */
 void usb_send(uint8_t index, uint8_t len, uint8_t* pattern)
 {
+    if (index == PACKET_CONF)
+    {
+        uart_send_conf(len, pattern);
+        return;
+    }
+
     if (len > 61)
         return;
 
@@ -380,7 +385,8 @@ void usb_comm_timer_start()
  */
 void usb_comm_sleep_prepare()
 {
-    uart_to_idle();
+    uart_queue_clear();
+    app_uart_close();
 #ifdef UART_DET
     nrf_gpio_cfg_sense_input(UART_DET, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_SENSE_LOW);
 #else
@@ -419,6 +425,7 @@ static struct host_driver usb_driver = {
     .queue_empty = &uart_queue_empty,
     .send_packet = &usb_send,
     .driver_working = &usb_working,
+    .mtu = 62,
 };
 
 // 以一个较高优先级注册USB驱动

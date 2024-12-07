@@ -28,6 +28,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "keyboard_fn.h"
 #include "hid_configuration.h"
 #include "host.h"
+#include "usb_comm.h"
+#include "ble_comm.h"
+
 
 #define MAX_BUFFER_ENTRIES 5 /**< Number of elements that can be enqueued */
 #define BASE_USB_HID_SPEC_VERSION 0x0101 /**< Version number of base USB HID Specification implemented by this application. */
@@ -48,8 +51,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define INPUT_REPORT_LEN_MOUSE 5
 #define INPUT_REPORT_LEN_SYSTEM 2
 #define INPUT_REPORT_LEN_CONSUMER 2
-#define INPUT_REPORT_LEN_DATA 63
-#define OUTPUT_REPORT_LEN_DATA 63
+#define INPUT_REPORT_LEN_DATA 28
+#define OUTPUT_REPORT_LEN_DATA 28
 
 #define INPUT_REP_INDEX_INVALID 0xFF /** Invalid index **/
 
@@ -276,10 +279,10 @@ static void hids_init(ble_srv_error_handler_t err_handler)
  */
 void  ble_send_conf(uint8_t len, uint8_t* data)
 {
-    if (len > 63)
+    if (len > INPUT_REPORT_LEN_DATA)
         return;
 
-    uint8_t buff[63] = {0};
+    uint8_t buff[INPUT_REPORT_LEN_DATA] = {0};
     memcpy(&buff[0], data, len);
     ble_hids_inp_rep_send(&m_hids,
         INPUT_REP_DATA_INDEX,
@@ -489,10 +492,8 @@ static void on_hid_rep_char_write(ble_hids_evt_t* p_evt)
                 control_val);
 
             if (err_code == NRF_SUCCESS) {
-                respond_flag = true;
-                hid_on_recv(control_val[0], control_val[1], &control_val[2]);
+                ble_hid_on_recv(control_val[0], control_val[1], &control_val[2]);
             } else {
-                respond_flag = true;
                 hid_response_generic(HID_RESP_UART_CHECKSUM_ERROR);
             }
         }
@@ -539,6 +540,10 @@ void hid_service_init(ble_srv_error_handler_t err_handler)
 {
     hids_init(err_handler);
     buffer_init();
+     //蓝牙初始化时正确设定协议
+    if(!usb_working()){
+        keyboard_protocol = m_ble_in_report_mode;
+    }
 }
 
 void hid_event_handler(enum user_event evt, void* arg)

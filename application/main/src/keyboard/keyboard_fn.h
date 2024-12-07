@@ -60,24 +60,3 @@ typedef void (*fn_handler)(keyrecord_t* record, uint8_t id, uint8_t opt);
     __pt_##handler = &handler
 #define FN_HANDLER_COUNT NRF_SECTION_ITEM_COUNT(fn_handler, const fn_handler)
 #define FN_HANDLER_GET(i) (NRF_SECTION_ITEM_GET(fn_handler, const fn_handler, i))
-
-/**
- * @brief 模块的control action处理函数
- * 
- */
-typedef void (*control_handler)(uint8_t id, uint8_t opt);
-
-/**
- * @brief 定义control action处理函数
- * 
- */
-#define CTRL_HANDLER_DEF() NRF_SECTION_DEF(control_handler, const control_handler)
-/**
- * @brief 定义一个control action处理函数
- * 
- */
-#define CTRL_HANDLER(ctrl_handler)                                 \
-    NRF_SECTION_ITEM_REGISTER(control_handler, const control_handler) \
-    __pt_##ctrl_handler = &ctrl_handler
-#define CTRL_HANDLER_COUNT NRF_SECTION_ITEM_COUNT(control_handler, const control_handler)
-#define CTRL_HANDLER_GET(i) (NRF_SECTION_ITEM_GET(control_handler, const control_handler, i))

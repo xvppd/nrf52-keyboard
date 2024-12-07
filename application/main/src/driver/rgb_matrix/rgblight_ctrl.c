@@ -6,10 +6,10 @@
 #include "rgb_matrix.h"
 #endif
 
-static void action(uint8_t id, uint8_t opt)
+static void rgblight_fn_handler(keyrecord_t* record, uint8_t id, uint8_t opt)
 {
 #ifdef RGBLIGHT_ENABLE
-    if (id == RGBLIGHT_CONTROL) {
+    if (id == RGBLIGHT_CONTROL && record->event.pressed) {
         switch (opt) {
         case RGBLIGHT_TOGGLE:
             rgblight_toggle();
@@ -50,7 +50,7 @@ static void action(uint8_t id, uint8_t opt)
     }
 #endif
 #ifdef RGB_MATRIX_ENABLE
-    if (id == RGBMATRIX_CONTROL) {
+    if (id == RGBMATRIX_CONTROL && record->event.pressed) {
         switch (opt) {
         case RGBLIGHT_TOGGLE:
             rgb_matrix_toggle();
@@ -90,20 +90,7 @@ static void action(uint8_t id, uint8_t opt)
         }
     }
 #endif
-}
 
-static void rgblight_fn_handler(keyrecord_t* record, uint8_t id, uint8_t opt)
-{
-    if (record->event.pressed) {
-        action(id, opt);
-    }
 }
 
 FN_HANDLER(rgblight_fn_handler);
-
-static void rgblight_ctrl_handler(uint8_t id, uint8_t opt)
-{
-    action(id, opt);
-}
-
-CTRL_HANDLER(rgblight_ctrl_handler);

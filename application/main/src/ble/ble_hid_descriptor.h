@@ -151,18 +151,18 @@ static uint8_t hid_descriptor[] = {
     0xc0, // END_COLLECTION
 #endif
     // HID control
-    0x06, 0x00, 0xff, // Usage Page (Vendor Defined)
-    0x09, 0x01, // Usage Page (Vendor Defined)
+    0x06, 0xea, 0xff, // Usage Page (Vendor Defined)
+    0x09, 0x72, // Usage Page (Vendor Defined)
     0xa1, 0x01, // COLLECTION (Application)
     0x85, 0x3f, // Report ID (63)
-    0x95, 0x3f, // Report Count 63
+    0x95, 0x1C, // Report Count 28
     0x75, 0x08, // Report Size
     0x25, 0x01, // Usage Maximum
     0x15, 0x01, // Usage Minimum
     0x09, 0x01, // Vendor Usage
     0x81, 0x02, // Input (Data,Var,Abs)
     0x85, 0x3f, // Report ID (63)
-    0x95, 0x3f, // Report Count 63
+    0x95, 0x1C, // Report Count 28
     0x75, 0x08, // Report Size
     0x25, 0x01, // Usage Maximum
     0x15, 0x01, // Usage Minimum

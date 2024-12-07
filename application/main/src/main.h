@@ -48,7 +48,6 @@ void sleep(enum SLEEP_REASON reason);
  * 
  * @param mode: 睡眠模式
  */
-void notify_sleep(enum sleep_evt_type mode);
 extern bool erase_bonds;
 void service_error_handler(uint32_t nrf_error);
 extern bool ble_service_inited;

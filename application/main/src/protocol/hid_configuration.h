@@ -1,10 +1,11 @@
 #pragma once
 #include "data_storage.h"
 #include "nrf_section.h"
+#include "keyboard_host_driver.h"
 #include <stdint.h>
 
-#define HID_PROTOCOL 4
-#define MAX_HID_PACKET_SIZE 56
+#define HID_PROTOCOL 5
+#define MAX_HID_PACKET_SIZE current_packet_size
 
 #ifndef BUILD_TIME
 #define BUILD_TIME 0
@@ -18,9 +19,9 @@
 
 extern const uint32_t keyboard_function_table;
 
-extern bool respond_flag;
-
 enum hid_command {
+    // 通用操作
+    HID_CMD_GENERIC,
     // 获取键盘信息
     HID_CMD_GET_INFORMATION = 0x20,
     // 获取单个按键键值
@@ -59,8 +60,23 @@ enum hid_command {
     HID_CMD_WRITE_CONFIG = 0x3E,
     // 重置键盘
     HID_CMD_RESET_CONFIG = 0x3F,
-    // 控制键盘功能
-    HID_CMD_CONTROL_KEYBOARD=0X40,
+    // 设置/获取当前层
+    HID_CMD_ABOUT_LAYER = 0x40,
+    // 执行 Action Code
+    HID_CMD_EXECUTE_ACTION_CODE = 0x41,
+    // 获取电量信息
+    HID_CMD_GET_BATTERY_INFO = 0x42,
+    // 获取/设置 USB 状态
+    HID_CMD_ABOUT_USB = 0x43,
+    // 获取/设置蓝牙状态
+    HID_CMD_ABOUT_BLE = 0x44,
+    // 获取/设置ESB状态
+    HID_CMD_ABOUT_ESB = 0x45,
+    // 获取当前输出模式
+    HID_CMD_ABOUT_MODE = 0x80,
+    // 获取接收器信息
+    HID_CMD_GET_ESB_RX_INFO = 0x81,
+    // 
 };
 
 enum hid_response {
@@ -78,10 +94,9 @@ enum hid_response {
     HID_RESP_UART_CHECKSUM_ERROR,
 };
 
-void hid_on_recv(uint8_t command, uint8_t len, uint8_t* data);
-void hid_response_success(uint8_t len, uint8_t* data);
+void hid_on_recv(const struct host_driver* driver, uint8_t command, uint8_t len, uint8_t* data);
 void hid_response_generic(enum hid_response response);
-void hid_send_error(uint8_t id, uint32_t err_code);
+void hid_send_error(bool flag, uint8_t id, uint32_t err_code);
 void hid_send_log(bool flag, uint8_t id, uint8_t len, uint8_t* data);
 
 /**

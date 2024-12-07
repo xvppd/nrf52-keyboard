@@ -134,6 +134,7 @@ uint8_t g_rgb_frame_buffer[MATRIX_ROWS][MATRIX_COLS] = { { 0 } };
 #ifdef RGB_MATRIX_KEYREACTIVE_ENABLED
 last_hit_t g_last_hit_tracker;
 #endif // RGB_MATRIX_KEYREACTIVE_ENABLED
+bool sys_led_on_flag = false;  // 是否亮起系统指示灯
 
 // internals
 static bool suspend_state = false;
@@ -515,11 +516,15 @@ static void rgb_matrix_toggle_pwr(void)
 {
     if (!rgb_matrix_config.indicators && !rgb_matrix_config.enable) {
         ws2812_pwr_off();
+        rgb_timer_stop();
     } else if (rgb_matrix_config.indicators) {
         ws2812_pwr_on();
+        rgb_timer_start();
+        sys_led_on_flag = true;
         power_save_reset();
     } else if (rgb_matrix_config.enable) {
         ws2812_pwr_on();
+        rgb_timer_start();
     }
 }
 
@@ -550,8 +555,8 @@ void rgb_matrix_init(void)  //need mod
     }
 //    eeconfig_debug_rgb_matrix(); // display current eeprom values
     ws2812_pwr_init();
-    rgb_matrix_toggle_pwr();
     rgb_timer_init();
+    rgb_matrix_toggle_pwr();
 }
 
 //休眠关机时调用关闭RGB
@@ -559,7 +564,8 @@ void rgb_matrix_sleep_prepare(void)  //need mod
 {
     // 禁用RGB MATRIX
     ws2812_pwr_off();
-    wait_ms(1);
+    rgb_timer_stop();
+    //wait_ms(1);
     ws2812_pwr_deinit();
 }
 
@@ -625,7 +631,7 @@ void rgb_matrix_disable_noeeprom(void) //need mod
     if (rgb_matrix_config.enable)
         rgb_task_state = STARTING;
     rgb_matrix_config.enable = 0;
-    wait_ms(10);
+    //wait_ms(10);
     rgb_matrix_toggle_pwr();
 }
 
@@ -771,10 +777,8 @@ static void status_rgb_matrix_evt_handler(enum user_event event, void* arg) //ne
         break;
     case USER_EVT_POWERSAVE:
         switch (arg2) {
-        case PWR_SAVE_EXIT: // 重置省电模式
-            power_save_reset();
-            break;
         case PWR_SAVE_OFF: //禁用省电模式
+            sys_led_on_flag = true;
             rgb_powersave_mode = false;
             rgb_matrix_set_power_save_mode();
             break;
@@ -792,10 +796,15 @@ static void status_rgb_matrix_evt_handler(enum user_event event, void* arg) //ne
         case BLE_STATE_DISCONNECT:
         case BLE_STATE_FAST_ADV:
             power_save_reset();
+            sys_led_on_flag = true;
             break;
         default:
             break;
         }
+        break;
+    case USER_EVT_BLE_DEVICE_SWITCH: //蓝牙连接设备切换
+        power_save_reset();
+        sys_led_on_flag = true;
         break;
     default:
         break;

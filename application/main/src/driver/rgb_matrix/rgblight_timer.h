@@ -18,3 +18,5 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
 void rgb_timer_init(void);
+void rgb_timer_start(void);
+void rgb_timer_stop(void);

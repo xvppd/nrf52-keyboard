@@ -51,6 +51,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         }                                                  \
     };
 
+static bool volatile s_fds_initialized;
+
 #ifdef KEYMAP_STORAGE
 #define KEYMAP_SIZE_WORD GET_WORD(KEYMAP_LAYER_SIZE* MAX_LAYER)
 #define KEYMAP_RECORD_KEY 0x0514
@@ -58,7 +60,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 REGISTER_FDS_BLOCK(keymap, KEYMAP_SIZE_WORD, KEYMAP_RECORD_KEY)
 
 static bool keymap_valid = true;
-static bool volatile s_fds_initialized;
 static void check_keymap()
 {
     bool flag = false;
@@ -147,8 +148,8 @@ const macro_t* action_get_macro(keyrecord_t* record, uint8_t id, uint8_t opt)
 #endif
 
 #ifdef CONFIG_STORAGE
-#define CONFIG_BLOCK_SIZE_WORD 4
-#define CONFIG_BLOCK_SIZE_BYTE CONFIG_BLOCK_SIZE_WORD * 4
+#define CONFIG_BLOCK_SIZE_WORD GET_WORD(MAX_CONFIG_SIZE)
+#define CONFIG_BLOCK_SIZE_BYTE MAX_CONFIG_SIZE  //除去记录的header（3个word），实际可用(16-3)*4
 #define CONFIG_RECORD_KEY 0x0497
 
 REGISTER_FDS_BLOCK(config, CONFIG_BLOCK_SIZE_WORD, CONFIG_RECORD_KEY)
@@ -527,9 +528,10 @@ uint16_t storage_write_data(enum storage_type type, uint16_t offset, uint16_t le
         len = size - offset;
 
     memcpy(&pointer[offset], data, len);
-
+#ifdef KEYMAP_STORAGE
     if (type == STORAGE_KEYMAP)
         check_keymap();
+#endif
 
     return len;
 }

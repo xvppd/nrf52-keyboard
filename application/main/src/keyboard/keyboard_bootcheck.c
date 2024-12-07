@@ -109,11 +109,7 @@ bool bootcheck_flag_get(void)
  */
 void bootcheck_flag_toggle(void)
 {
-    if (bootcheck_flag.data[0]) {
-        bootcheck_flag.data[0] = 0x00;
-    } else {
-        bootcheck_flag.data[0] = 0x01;
-    }
+    bootcheck_flag.data[0] ^= 0x01;
     storage_write((1 << STORAGE_CONFIG));
 }
 

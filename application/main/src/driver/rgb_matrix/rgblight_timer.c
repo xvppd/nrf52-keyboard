@@ -42,5 +42,10 @@ static void rgb_timer_handler(void* p_context)
 void rgb_timer_init(void)
 {
     app_timer_create(&rgb_timer, APP_TIMER_MODE_REPEATED, rgb_timer_handler);
+}
+void rgb_timer_start(void){
     app_timer_start(rgb_timer, APP_TIMER_TICKS(10), NULL);
+}
+void rgb_timer_stop(void){
+    app_timer_stop(rgb_timer);
 }

@@ -6,7 +6,7 @@ GROUP(-lgcc -lc -lnosys)
 MEMORY
 {
   FLASH (rx) : ORIGIN = 0x19000, LENGTH = 0x17000
-  RAM (rwx) :  ORIGIN = 0x20001E00, LENGTH = 0x4200
+  RAM (rwx) :  ORIGIN = 0x20001AE0, LENGTH = 0x4520
 }
 
 SECTIONS
@@ -45,12 +45,6 @@ SECTIONS
     PROVIDE(__start_fn_handler = .);
     KEEP(*(.fn_handler))
     PROVIDE(__stop_fn_handler = .);
-  } > RAM
-  .control_handler :
-  {
-    PROVIDE(__start_control_handler = .);
-    KEEP(*(.control_handler))
-    PROVIDE(__stop_control_handler = .);
   } > RAM
   .host_driver :
   {

@@ -87,6 +87,7 @@
 #include "ble/ble_bas_service.h"
 #include "ble/ble_hid_service.h"
 #include "ble/ble_services.h"
+#include "nrf_drv_clock.h"
 #include "nrf_sdh.h"
 #include "nrf_power.h"
 
@@ -235,21 +236,24 @@ static void timers_start(void)
 }
 
 /**
- * @brief 发送键盘睡眠通知
- * 
- * @param reason 
+ * @brief 通知进入睡眠状态
+ *
+ * 调用此函数通知系统进入睡眠状态。
+ *
+ * @param ticks 延迟进入睡眠的定时器滴答数
+ * @param mode 睡眠事件类型
  */
-void notify_sleep(enum sleep_evt_type mode)
+static void notify_sleep(uint16_t ticks, enum sleep_evt_type mode)
 {
     trig_event_param(USER_EVT_SLEEP, mode);
     trig_event_param(USER_EVT_STAGE, KBD_STATE_SLEEP);
     /**
      * 延迟进入睡眠，由于按键进入睡眠时手指还按着按键，
-     * 如果延迟太短容易导致键盘直接重启，500ms~1000ms较为适宜
+     * 如果延迟太短容易导致键盘直接重启，部分模式下，设置500ms~1000ms延迟较为适宜
      * 操作时要注意避免延迟期间继续按键，避免休眠成功又直接唤醒
      * 同时要注意休眠延迟期间，如果有按键行为，键值将输出到连接设备
      */ 
-    app_timer_start(sleep_delay_timer, APP_TIMER_TICKS(600), (void*)(uint32_t)mode); 
+    app_timer_start(sleep_delay_timer, APP_TIMER_TICKS(ticks), (void*)(uint32_t)mode); 
 }
 
 /**
@@ -259,11 +263,11 @@ void notify_sleep(enum sleep_evt_type mode)
  */
 static void sleep_mode_enter(bool keyboard_wakeup)
 {
-    reset_prepare();
+    reset_prepare(); //停止定时器和LED
     if (keyboard_wakeup) {
         matrix_wakeup_prepare(); // 准备按键阵列用于唤醒
     } else {
-        matrix_deinit(); // 关闭按键阵列
+        matrix_deinit(); // 关闭按键阵列，此处位置不能提前，避免定时器未停止前出现莫名的按键输出
     }
 #ifdef HAS_USB
         usb_comm_sleep_prepare();
@@ -274,12 +278,11 @@ static void sleep_mode_enter(bool keyboard_wakeup)
 #ifdef SOFTDEVICE_PRESENT
         if (nrf_sdh_is_enabled()) {  //蓝牙模式下，调用sd_power_system_off进入system-off模式，避免无法正确休眠的问题
             sd_power_system_off();
-        } else
-#endif // SOFTDEVICE_PRESENT
-        {
-            // ESB模式下，调用nrf_power_system_off进入system-off模式
-            nrf_power_system_off();
         }
+#endif // SOFTDEVICE_PRESENT
+        // 调用nrf_power_system_off进入system-off模式
+        //nrf_power_system_off();
+        NRF_POWER->SYSTEMOFF = 1;
 }
 /**
  * @brief 延迟运行handler
@@ -311,24 +314,26 @@ static void sleep_delay_handler(void* p_context)
  */
 void sleep(enum SLEEP_REASON reason)
 {
+    keyboard_timer_stop(); //禁用键盘扫描和睡眠计时
     switch (reason) {
     case SLEEP_NO_CONNECTION:
     case SLEEP_TIMEOUT:
-        notify_sleep(SLEEP_EVT_AUTO);
+        notify_sleep(100, SLEEP_EVT_AUTO);
         break;
     case SLEEP_MANUALLY:
-        notify_sleep(SLEEP_EVT_MANUAL);
+        notify_sleep(1000, SLEEP_EVT_MANUAL);
         break;
     case SLEEP_MANUALLY_NO_WAKEUP:
-        notify_sleep(SLEEP_EVT_MANUAL_NO_WAKEUP);
+        notify_sleep(1000, SLEEP_EVT_MANUAL_NO_WAKEUP);
         break;
     case SLEEP_NOT_PWRON: // 键盘检测未符合开机条件，直接进入睡眠模式
         matrix_deinit();  //此模式仅有部分初始化完成，故可以提前禁用matirx，避免按键输出
-        //sleep_mode_enter(true);   //不经过app_timer_start，直接进入睡眠模式 : bootcheck启用，手动休眠后，按下按键未唤醒会导致spcae+u无法唤醒
-        app_timer_start(sleep_delay_timer, APP_TIMER_TICKS(100), (void*)(uint32_t)SLEEP_NOT_PWRON);
+        //sleep_mode_enter(true);   //不经过app_timer_star，直接进入睡眠模式存在问题: bootcheck启用，手动休眠后，按下按键未唤醒会导致spcae+u无法唤醒
+        notify_sleep(50, SLEEP_NOT_PWRON);
         break;
     case SLEEP_TO_RESET:
-        app_timer_start(sleep_delay_timer, APP_TIMER_TICKS(100), (void*)(uint32_t)SLEEP_EVT_RESET); //重启不用考虑过多问题，可快速启动。当前实际未使用此模式，仅作为保留代码。
+        //重启不用考虑过多问题，可快速启动。当前实际未使用此模式，仅作为保留代码。
+        notify_sleep(50, SLEEP_EVT_RESET);
         break;
     default:
         break;

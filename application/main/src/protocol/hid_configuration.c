@@ -15,8 +15,6 @@
 #include "keyboard_battery.h"
 #include "ble_hid_service.h"
 
-bool respond_flag; //用于判断发送的方向：false为USB，true为BLE
-
 const uint32_t keyboard_function_table =
 #ifdef BOOTMAGIC_ENABLE
     (1 << 0) +
@@ -72,37 +70,44 @@ static struct hid_config_section* hid_config_get(uint8_t id)
 }
 #endif
 
-/**
- * @brief 响应HID成功命令
- * 
- * @param len 额外数据长度
- * @param data 额外数据
- */
-void hid_response_success(uint8_t len, uint8_t* data)
-{
-    uint8_t buff[63];
-    buff[0] = 0x00;
-    buff[1] = len;
-    memcpy(&buff[2], data, len);
-    if (respond_flag) {
-        ble_send_conf(len + 2, buff);
-    } else {
-        uart_send_conf(len + 2, buff);
-    }
-}
+static const struct host_driver* last_driver = NULL;
+static uint8_t current_packet_size = 56;
+static keyrecord_t virtual_record = {
+    .event.pressed = true
+};
 
 /**
  * @brief 响应HID命令
  * 
- * @param response 响应状态
+ * 根据 HID 命令生成响应数据并发送
+ *
+ * @param cmd HID 命令类型
+ * @param len 响应数据的长度
+ * @param data 响应数据指针
+ */
+static void hid_response(enum hid_command cmd, uint8_t len, uint8_t* data)
+{
+    if (last_driver == NULL || !last_driver->driver_working())
+        return;
+
+    uint8_t buff[63];
+    buff[0] = cmd;
+    buff[1] = len;
+    memcpy(&buff[2], data, len);
+    last_driver->send_packet(PACKET_CONF, len + 2, buff);
+}
+
+/**
+ * @brief 响应HID处理结果
+ *
+ * @param response 响应结果
  */
 void hid_response_generic(enum hid_response response)
 {
-    if (respond_flag) {
-        ble_send_conf(1, &response);
-    } else {
-        uart_send_conf(1, &response);
-    }
+    if (last_driver == NULL || !last_driver->driver_working())
+        return;
+
+    last_driver->send_packet(PACKET_CONF, 1, &response);
 }
 
 /**
@@ -110,18 +115,20 @@ void hid_response_generic(enum hid_response response)
  *
  * @param err_code 错误信息
  */
-void hid_send_error(uint8_t id, uint32_t err_code)
+void hid_send_error(bool flag, uint8_t id, uint32_t err_code)
 {
+#ifdef DEBUG_INFO
     uint8_t data_buffer[6]; // 创建一个数组来存储err_code的字节
     data_buffer[0] = 0xFE;  // 附加包头确认数据类型
     data_buffer[1] = id;
     // 将err_code的每个字节复制到data_buffer中
     memcpy(data_buffer + 2, &err_code, sizeof(err_code));
-    if (respond_flag) {
-        ble_send_conf(4, data_buffer);
-    } else {
+    if (flag) {
         uart_send_conf(4, data_buffer);
+    } else {
+        ble_send_conf(4, data_buffer);
     }
+#endif
 }
 
 /**
@@ -133,6 +140,7 @@ void hid_send_error(uint8_t id, uint32_t err_code)
  */
 void hid_send_log(bool flag, uint8_t id, uint8_t len, uint8_t* data)
 {
+#ifdef DEBUG_INFO
     uint8_t data_buffer[61] = {0}; // 创建一个数组来存储log的字节
     data_buffer[0] = 0xFE;  // 附加包头254【0xFE】确认数据类型为运行记录日志
     data_buffer[1] = id;    // 附加ID，用于标示及确认日志来自于代码那个位置
@@ -143,6 +151,7 @@ void hid_send_log(bool flag, uint8_t id, uint8_t len, uint8_t* data)
     } else {
         ble_send_conf(len + 2, data_buffer);
     }
+#endif
 }
 
 /**
@@ -151,8 +160,6 @@ void hid_send_log(bool flag, uint8_t id, uint8_t len, uint8_t* data)
  */
 static void send_information()
 {
-    uint8_t default_layer = default_layer_state & 0XFF;
-    uint8_t layer = layer_state & 0XFF;
     const uint8_t info[] = {
         UINT16_SEQ(CONF_VENDOR_ID), // VENDOR
         UINT16_SEQ(CONF_PRODUCT_ID), // PRODUCT
@@ -161,12 +168,47 @@ static void send_information()
         UINT32_SEQ(APP_VERSION), // FIRMWARE_VER
         UINT32_SEQ(BUILD_TIME), // BUILD_DATE
         UINT32_SEQ(keyboard_function_table), // FUNCTION_TABLE
-        battery_info.percentage,
-        default_layer,
-        layer,
+        UINT32_SEQ(NRF_FICR->INFO.PART), // 芯片型号
     };
-    hid_response_success(sizeof(info), (uint8_t*)info);
+    hid_response(HID_CMD_GENERIC, sizeof(info), (uint8_t*)info);
 }
+
+static uint8_t get_trunk_size(uint8_t mtu)
+{
+    return (mtu - 3) / 4 * 4;
+}
+
+static void send_information_sub_1()
+{
+    uint8_t info[8] = { 
+        UINT32_SEQ(NRF_FICR->DEVICEID[0]),
+        UINT32_SEQ(NRF_FICR->DEVICEID[1]),
+     };
+
+    info[6] = current_packet_size;
+    info[7] = 0;
+    hid_response(HID_CMD_GENERIC, sizeof(info), info);
+}
+
+static void send_information_layer()
+{
+        uint8_t info[8] = {
+        UINT32_SEQ(layer_state), // 层
+        UINT32_SEQ(default_layer_state), // 默认层
+    };
+    hid_response(HID_CMD_ABOUT_LAYER, sizeof(info), (uint8_t*)info);
+}
+
+static void send_information_battery()
+{
+        uint8_t info[1] = {
+        battery_info.percentage, // 电量
+    };
+    hid_response(HID_CMD_GET_BATTERY_INFO, sizeof(info), (uint8_t*)info);
+}
+
+
+
 
 /**
  * @brief 获取单个按键键值
@@ -183,11 +225,11 @@ static void get_single_key(uint8_t layer, uint8_t row, uint8_t col)
     };
 #ifndef ACTIONMAP_ENABLE
     uint8_t code[] = { keymap_key_to_keycode(layer, pos), 0 };
-    hid_response_success(2, code);
+    hid_response(HID_CMD_GENERIC, 2, code);
 #else
     action_t action = action_for_key(layer, pos);
     uint8_t code[] = { UINT16_SEQ(action.code) };
-    hid_response_success(2, code);
+    hid_response(HID_CMD_GENERIC, 2, code);
 #endif
 }
 /**
@@ -202,7 +244,7 @@ static void get_single_fn(uint8_t id)
     uint8_t len = storage_read_data(STORAGE_FN, id * 2, 2, data);
     if (len != 2)
         return hid_response_generic(HID_RESP_PARAMETER_ERROR);
-    hid_response_success(2, data);
+    hid_response(HID_CMD_GENERIC, 2, data);
 #else
     hid_response_generic(HID_RESP_UNDEFINED);
 #endif
@@ -216,7 +258,7 @@ static void response_storage(enum storage_type type, uint16_t offset, uint16_t l
     uint8_t data[MAX_HID_PACKET_SIZE];
 
     len = storage_read_data(type, offset, len, data);
-    hid_response_success(len, data);
+    hid_response(HID_CMD_GENERIC, len, data);
 }
 
 /**
@@ -256,7 +298,7 @@ static void get_single_config(uint8_t id)
     if (item == 0) {
         hid_response_generic(HID_RESP_PARAMETER_ERROR);
     } else {
-        hid_response_success(item->section->len, item->section->data);
+        hid_response(HID_CMD_GENERIC, item->section->len, item->section->data);
     }
 #else
     hid_response_generic(HID_RESP_UNDEFINED);
@@ -444,15 +486,30 @@ static void reset_data(uint8_t type)
  * @param len 额外数据长度
  * @param data 额外数据
  */
-void hid_on_recv(uint8_t command, uint8_t len, uint8_t* data)
+void hid_on_recv(const struct host_driver* driver, uint8_t command, uint8_t len, uint8_t* data)
 {
+    last_driver = driver;
+    current_packet_size = get_trunk_size(driver->mtu);
+
     switch (command) {
-    case HID_CMD_GET_INFORMATION:
-        if (len != 0)
-            hid_response_generic(HID_RESP_PARAMETER_ERROR);
-        else
+    case HID_CMD_GET_INFORMATION: {
+        uint8_t type = 0;
+        if (len == 1)
+            type = data[0];
+
+        switch (type) {
+        case 0:
             send_information();
+            break;
+        case 1:
+            send_information_sub_1();
+            break;
+        default:
+            hid_response_generic(HID_RESP_PARAMETER_ERROR);
+            break;
+        }
         break;
+    }
     case HID_CMD_GET_SINGLE_KEY:
         if (len != 3)
             hid_response_generic(HID_RESP_PARAMETER_ERROR);
@@ -531,11 +588,30 @@ void hid_on_recv(uint8_t command, uint8_t len, uint8_t* data)
         else
             reset_data(data[0]);
         break;
-    case HID_CMD_CONTROL_KEYBOARD:
+    case HID_CMD_ABOUT_LAYER:
+        switch (len) {
+        case 0:
+            send_information_layer();
+            break;
+        case 8:
+            // 操作层，暂无实现
+            break;
+        default:
+            hid_response_generic(HID_RESP_PARAMETER_ERROR);
+            break;
+        }
+        break;
+    case HID_CMD_EXECUTE_ACTION_CODE:
         if (len != 2)
             hid_response_generic(HID_RESP_PARAMETER_ERROR);
         else
-            control_action(data[0],data[1]);
+            action_function(&virtual_record, data[0], data[1]);
+        break;
+    case HID_CMD_GET_BATTERY_INFO:
+        if (len != 0)
+            hid_response_generic(HID_RESP_PARAMETER_ERROR);
+        else
+            send_information_battery();
         break;
     default:
         hid_response_generic(HID_RESP_UNDEFINED);

@@ -254,8 +254,10 @@ void rgblight_init(void)  //need mod
     if (rgblight_config.enable) {
         rgblight_mode_noeeprom(rgblight_config.mode);
         ws2812_pwr_on();
+        rgb_timer_start();
     } else {
         ws2812_pwr_off();
+        rgb_timer_stop();
     }
     rgb_timer_init();
     is_rgblight_initialized = true;
@@ -390,6 +392,7 @@ void rgblight_toggle_noeeprom(void)
 void rgblight_enable(void) //need mod
 {
     ws2812_pwr_on();
+    rgb_timer_start();
     rgblight_config.enable = 1;
     // No need to update EEPROM here. rgblight_mode() will do that, actually
     // eeconfig_update_rgblight(rgblight_config.raw);
@@ -399,6 +402,7 @@ void rgblight_enable(void) //need mod
 void rgblight_enable_noeeprom(void) //need mod
 {
     ws2812_pwr_on();
+    rgb_timer_start();
     rgblight_config.enable = 1;
     rgblight_mode_noeeprom(rgblight_config.mode);
 }
@@ -412,6 +416,7 @@ void rgblight_disable(void)  //need mod
     rgblight_set();
     wait_ms(2);
     ws2812_pwr_off();
+    rgb_timer_stop();
 }
 
 void rgblight_disable_noeeprom(void)  //need mod
@@ -422,6 +427,7 @@ void rgblight_disable_noeeprom(void)  //need mod
     rgblight_set();
     wait_ms(2);
     ws2812_pwr_off();
+    rgb_timer_stop();
 }
 
 bool rgblight_is_enabled(void) { return rgblight_config.enable; }

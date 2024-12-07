@@ -13,7 +13,7 @@ ASMFLAGS += -DNRF52832_XXAA
 ASMFLAGS += -DNRF52_PAN_74
 ASMFLAGS += -DBOARD_PCA10040
 
-ifndef NRF52_DISABLE_FPU
+ifdef NRF52_ENABLE_FPU
 	CFLAGS += -DFLOAT_ABI_HARD
 	CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
 	ASMFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16

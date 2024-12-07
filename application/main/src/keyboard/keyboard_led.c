@@ -51,7 +51,6 @@ void keyboard_led_set(uint8_t led_val)
 {
     saved_led_val = led_val;
     keyboard_led_set_internal(led_val);
-    power_save_reset();
 }
 
 /**
@@ -124,6 +123,9 @@ static void led_event_handler(enum user_event event, void* arg)
         default:
             break;
         }
+        break;
+    case USER_EVT_LED:
+        power_save_reset();
         break;
     default:
         break;
