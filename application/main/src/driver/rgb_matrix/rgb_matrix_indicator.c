@@ -38,48 +38,6 @@ void rgb_matrix_indicators_advanced_kb(uint8_t led_min, uint8_t led_max)
         rgb_matrix_set_color_all(RGB_OFF);
     }
 
-    //层状态指示灯
-#ifdef RGB_MATRIX_INDICATORS_LAYER_1
-    if ((((layer_state & (1UL<<0)) > 0UL) || ((default_layer_state & (1UL<<0)) > 0UL) || (default_layer_state == 0)) && (power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯1
-        rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_1, RGB_TURQUOISE);
-    }
-#endif
-#ifdef RGB_MATRIX_INDICATORS_LAYER_2
-    if ((((layer_state & (1UL<<1)) > 0UL) || ((default_layer_state & (1UL<<1)) > 0UL)) && (power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯2
-        rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_2, RGB_TURQUOISE);
-    }
-#endif
-#ifdef RGB_MATRIX_INDICATORS_LAYER_3
-    if ((((layer_state & (1UL<<2)) > 0UL) || ((default_layer_state & (1UL<<2)) > 0UL)) && (power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯3
-        rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_3, RGB_TURQUOISE);
-    }
-#endif
-#ifdef RGB_MATRIX_INDICATORS_LAYER_4
-    if ((((layer_state & (1UL<<3)) > 0UL) || ((default_layer_state & (1UL<<3)) > 0UL)) && (power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯4
-        rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_4, RGB_TURQUOISE);
-    }
-#endif
-#ifdef RGB_MATRIX_INDICATORS_LAYER_5
-    if ((((layer_state & (1UL<<4)) > 0UL) || ((default_layer_state & (1UL<<4)) > 0UL)) && (power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯5
-        rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_5, RGB_TURQUOISE);
-    }
-#endif
-#ifdef RGB_MATRIX_INDICATORS_LAYER_6
-    if ((((layer_state & (1UL<<5)) > 0UL) || ((default_layer_state & (1UL<<5)) > 0UL)) && (power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯6
-        rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_6, RGB_TURQUOISE);
-    }
-#endif
-#ifdef RGB_MATRIX_INDICATORS_LAYER_7
-    if ((((layer_state & (1UL<<6)) > 0UL) || ((default_layer_state & (1UL<<6)) > 0UL)) && (power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯7
-        rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_7, RGB_TURQUOISE);
-    }
-#endif
-#ifdef RGB_MATRIX_INDICATORS_LAYER_8
-    if ((((layer_state & (1UL<<7)) > 0UL) || ((default_layer_state & (1UL<<7)) > 0UL)) && (power_save_mode != 2) && rgb_matrix_is_indicator()) { //层指示灯8
-        rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_8, RGB_TURQUOISE);
-    }
-#endif
- 
 #ifdef RGB_MATRIX_INDICATORS_CAPS
     if ((host_keyboard_leds() & (1 << 1)) && rgb_matrix_is_indicator()) { // CAPS_LOCK
         rgb_matrix_set_color(RGB_MATRIX_INDICATORS_CAPS, RGB_RED);
@@ -120,8 +78,49 @@ void rgb_matrix_indicators_advanced_kb(uint8_t led_min, uint8_t led_max)
                 }
             }
         }
-    }
 #endif
+         //层状态指示灯
+#ifdef RGB_MATRIX_INDICATORS_LAYER_1
+        if ((((layer_state & (1UL<<0)) > 0UL) || ((default_layer_state & (1UL<<0)) > 0UL) || (default_layer_state == 0))) { //层指示灯1
+            rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_1, RGB_TURQUOISE);
+        }
+#endif
+#ifdef RGB_MATRIX_INDICATORS_LAYER_2
+        if ((((layer_state & (1UL<<1)) > 0UL) || ((default_layer_state & (1UL<<1)) > 0UL))) { //层指示灯2
+            rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_2, RGB_TURQUOISE);
+        }
+#endif
+#ifdef RGB_MATRIX_INDICATORS_LAYER_3
+        if ((((layer_state & (1UL<<2)) > 0UL) || ((default_layer_state & (1UL<<2)) > 0UL))) { //层指示灯3
+            rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_3, RGB_TURQUOISE);
+        }
+#endif
+#ifdef RGB_MATRIX_INDICATORS_LAYER_4
+        if ((((layer_state & (1UL<<3)) > 0UL) || ((default_layer_state & (1UL<<3)) > 0UL))) { //层指示灯4
+            rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_4, RGB_TURQUOISE);
+        }
+#endif
+#ifdef RGB_MATRIX_INDICATORS_LAYER_5
+        if ((((layer_state & (1UL<<4)) > 0UL) || ((default_layer_state & (1UL<<4)) > 0UL))) { //层指示灯5
+            rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_5, RGB_TURQUOISE);
+        }
+#endif
+#ifdef RGB_MATRIX_INDICATORS_LAYER_6
+        if ((((layer_state & (1UL<<5)) > 0UL) || ((default_layer_state & (1UL<<5)) > 0UL))) { //层指示灯6
+            rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_6, RGB_TURQUOISE);
+        }
+#endif
+#ifdef RGB_MATRIX_INDICATORS_LAYER_7
+        if ((((layer_state & (1UL<<6)) > 0UL) || ((default_layer_state & (1UL<<6)) > 0UL))) { //层指示灯7
+            rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_7, RGB_TURQUOISE);
+        }
+#endif
+#ifdef RGB_MATRIX_INDICATORS_LAYER_8
+        if ((((layer_state & (1UL<<7)) > 0UL) || ((default_layer_state & (1UL<<7)) > 0UL))) { //层指示灯8
+            rgb_matrix_set_color(RGB_MATRIX_INDICATORS_LAYER_8, RGB_TURQUOISE);
+        }
+#endif
+    }
 }
 
 static void rgb_matrix_indicators_on(void) {
