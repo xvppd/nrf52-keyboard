@@ -3997,7 +3997,7 @@
 // <0=> Pause in SLEEP and HALT 
 
 #ifndef NRFX_WDT_CONFIG_BEHAVIOUR
-#define NRFX_WDT_CONFIG_BEHAVIOUR 0
+#define NRFX_WDT_CONFIG_BEHAVIOUR 1
 #endif
 
 // <o> NRFX_WDT_CONFIG_RELOAD_VALUE - Reload value  <15-4294967295> 
@@ -9904,12 +9904,12 @@
 
 // <o> NRF_SDH_BLE_GATT_MAX_MTU_SIZE - Static maximum MTU size. 
 #ifndef NRF_SDH_BLE_GATT_MAX_MTU_SIZE
-#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 31
+#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 23
 #endif
 
 // <o> NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE - Attribute Table size in bytes. The size must be a multiple of 4. 
 #ifndef NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE
-#define NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE 1444
+#define NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE 1408
 #endif
 
 // <o> NRF_SDH_BLE_VS_UUID_COUNT - The number of vendor-specific UUIDs. 
