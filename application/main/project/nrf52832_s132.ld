@@ -46,6 +46,12 @@ SECTIONS
     KEEP(*(.fn_handler))
     PROVIDE(__stop_fn_handler = .);
   } > RAM
+  .control_handler :
+  {
+    PROVIDE(__start_control_handler = .);
+    KEEP(*(.control_handler))
+    PROVIDE(__stop_control_handler = .);
+  } > RAM
   .host_driver :
   {
     PROVIDE(__start_host_driver = .);
