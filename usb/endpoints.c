@@ -23,7 +23,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "endpoints.h"
 
 #define THIS_ENDP0_SIZE DEFAULT_ENDP0_SIZE
-#define REMOTE_WAKE true
 
 /**
  * @brief 端点0/4缓冲区。
@@ -181,6 +180,9 @@ void EP0_SETUP()
             // USB枚举完毕
             usb_state.is_ready = UsbConfig > 0;
             usb_state.setup_state = SETUP_STATE_IN;
+            //枚举完成代表接入了正确的主机，将RESET_KEEP寄存器写入1，在重新断电上电RESET_KEEP清零之前
+            //可认为CH552一直正确接入主机上
+            RESET_KEEP = 1;
             break;
 
         case USB_GET_INTERFACE:
@@ -225,7 +227,6 @@ void EP0_SETUP()
                 }
                 break;
             }
-#if REMOTE_WAKE
             case USB_REQ_TO_DEVICE:
                 if (UsbSetupBuf->wValue != 0x01) {
                     // 操作失败
@@ -235,7 +236,6 @@ void EP0_SETUP()
                 // 设置唤醒使能标志
                 usb_state.remote_wake = false;
                 break;
-#endif
             default: //unsupport
                 SETUP_STALL();
                 return;
@@ -276,7 +276,6 @@ void EP0_SETUP()
                 }
                 break;
             }
-#if REMOTE_WAKE
             case USB_REQ_TO_DEVICE: {
                 if (UsbSetupBuf->wValue != 0x01) {
                     SETUP_STALL();
@@ -286,7 +285,6 @@ void EP0_SETUP()
                 usb_state.remote_wake = true;
                 break;
             }
-#endif
             default:
                 SETUP_STALL();
                 return;
